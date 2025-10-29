@@ -10,7 +10,6 @@ AI-powered personal financial analyst built with Streamlit
 ## 🚀 Live App
 
 👉 **Try it now:** [https://moneylytics.streamlit.app](#)  
-*(Replace this with your actual Streamlit Cloud URL after publishing)*
 
 ---
 
@@ -25,8 +24,6 @@ AI-powered personal financial analyst built with Streamlit
 - ⚠️ Smart anomaly & overspend alerts  
 - 💹 Savings rate and trend forecasts  
 - 📤 One-click export to Excel, PDF, or ZIP bundles  
-- 🌗 Automatic dark/light mode sync with your system  
-
 ---
 
 ## 🧾 Features Breakdown
