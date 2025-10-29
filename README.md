@@ -9,7 +9,7 @@ AI-powered personal financial analyst built with Streamlit
 
 ## 🚀 Live App
 
-👉 **Try it now:** [https://moneylytics.streamlit.app/](#)  
+👉 **Try it now:** [https://moneylytics.streamlit.app](https://moneylytics.streamlit.app)
 
 ---
 
