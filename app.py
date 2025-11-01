@@ -78,7 +78,7 @@ SIDEBAR_BG = "#111418" if IS_DARK else "#F7F8FA"
 
 # -------------------- GLOBAL STYLES (dynamic with THEME_KEY) --------------------
 def apply_dynamic_css(theme_key: str):
-    """Inject dynamic CSS that fully refreshes with theme toggle."""
+    """Inject full dynamic CSS styling that adapts to dark/light mode."""
     IS_DARK = st.session_state.get("forced_theme", "light") == "dark"
 
     BG = "#0F1116" if IS_DARK else "#FFFFFF"
@@ -90,7 +90,7 @@ def apply_dynamic_css(theme_key: str):
     ACCENT_1 = "#64B5F6" if IS_DARK else "#1E88E5"
     ACCENT_2 = "#9575CD" if IS_DARK else "#673AB7"
     SUBTLE = "#2A2F3A" if IS_DARK else "#F2F4F7"
-    UPLOAD_BG = "#1C1F26" if IS_DARK else "#F9FAFB"  # Inner drag/drop zone
+    UPLOAD_BG = "#1C1F26" if IS_DARK else "#F9FAFB"
 
     st.markdown(f"""
     <style id="{theme_key}">
@@ -100,7 +100,9 @@ def apply_dynamic_css(theme_key: str):
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }}
 
-    /* HEADERS & TEXT */
+    /* ========================================
+       TEXT & HEADERS
+    ======================================== */
     h1, h2, h3, h4, h5, h6, label, p, span, div, strong, b {{
         color: {FG} !important;
     }}
@@ -114,7 +116,9 @@ def apply_dynamic_css(theme_key: str):
         -webkit-text-fill-color:transparent;
     }}
 
-    /* SIDEBAR */
+    /* ========================================
+       SIDEBAR
+    ======================================== */
     [data-testid="stSidebar"] {{
         background-color: {SIDEBAR_BG} !important;
         color: {SIDEBAR_FG} !important;
@@ -135,15 +139,14 @@ def apply_dynamic_css(theme_key: str):
         text-align: center !important;
         transition: all 0.25s ease-in-out;
     }}
-    [data-testid="stSidebar"] .stButton>button * {{
-        color: #FFFFFF !important;
-    }}
     [data-testid="stSidebar"] .stButton>button:hover {{
         opacity: 0.9 !important;
         transform: scale(1.03);
     }}
 
-    /* MAIN BUTTONS */
+    /* ========================================
+       MAIN BUTTONS
+    ======================================== */
     .stButton>button,
     .stDownloadButton>button {{
         background: linear-gradient(90deg, {ACCENT_1}, {ACCENT_2}) !important;
@@ -160,7 +163,9 @@ def apply_dynamic_css(theme_key: str):
         transform: scale(1.02);
     }}
 
-    /* INPUTS & TEXTBOXES */
+    /* ========================================
+       INPUTS & TEXTBOXES
+    ======================================== */
     input, select, textarea {{
         color: {FG} !important;
         background-color: {CARD_BG} !important;
@@ -177,7 +182,26 @@ def apply_dynamic_css(theme_key: str):
         border: 1px solid {BORDER} !important;
     }}
 
-    /* FILE UPLOADER (outer container) */
+    /* ========================================
+       DROPDOWN MENUS
+    ======================================== */
+    [data-baseweb="popover"] {{
+        background-color: {CARD_BG} !important;
+        border: 1px solid {BORDER} !important;
+        border-radius: 8px !important;
+    }}
+    [data-baseweb="popover"] * {{
+        background-color: {CARD_BG} !important;
+        color: {FG} !important;
+    }}
+    [data-baseweb="menu-item"]:hover {{
+        background: linear-gradient(90deg, {ACCENT_1}22, {ACCENT_2}22) !important;
+        color: {FG} !important;
+    }}
+
+    /* ========================================
+       FILE UPLOADER (outer box)
+    ======================================== */
     [data-testid="stFileUploader"] {{
         background-color: {SUBTLE} !important;
         border-radius: 10px !important;
@@ -188,21 +212,21 @@ def apply_dynamic_css(theme_key: str):
         color: {FG} !important;
     }}
 
-    /* FILE UPLOADER (inner drag/drop box) */
+    /* Inner drag/drop area */
     [data-testid="stFileUploaderDropzone"] {{
         background-color: {UPLOAD_BG} !important;
         color: {FG} !important;
         border: 2px dashed {BORDER} !important;
         border-radius: 12px !important;
-        transition: all 0.3s ease-in-out !important;
         text-align: center !important;
+        transition: all 0.3s ease-in-out !important;
     }}
     [data-testid="stFileUploaderDropzone"]:hover {{
         border-color: {ACCENT_1} !important;
         box-shadow: 0 0 10px {ACCENT_1}33 !important;
     }}
 
-    /* "Drag and drop" text styling */
+    /* "Drag and drop" text */
     [data-testid="stFileUploaderDropzone"] div:nth-child(1) {{
         font-weight: 600 !important;
         font-size: 1.05rem !important;
@@ -225,7 +249,9 @@ def apply_dynamic_css(theme_key: str):
         transform: scale(1.03);
     }}
 
-    /* METRICS */
+    /* ========================================
+       METRICS
+    ======================================== */
     [data-testid="stMetric"] {{
         background: {CARD_BG} !important;
         border: 1px solid {BORDER};
@@ -240,7 +266,9 @@ def apply_dynamic_css(theme_key: str):
         color: {FG} !important;
     }}
 
-    /* PLOTLY CONTAINERS */
+    /* ========================================
+       PLOTLY CHARTS
+    ======================================== */
     .plotly-chart, .stPlotlyChart, .plot-container {{
         background-color: {CARD_BG} !important;
         border: 1px solid {BORDER} !important;
@@ -249,19 +277,20 @@ def apply_dynamic_css(theme_key: str):
         color: {FG} !important;
     }}
 
-    /* DATAFRAMES */
+    /* ========================================
+       DATAFRAMES
+    ======================================== */
     .dataframe tbody tr, .dataframe thead th {{
         color: {FG} !important;
         background-color: {CARD_BG} !important;
     }}
 
-    /* Smooth color transitions */
+    /* Smooth transitions */
     * {{
         transition: background-color 0.3s ease, color 0.3s ease;
     }}
     </style>
     """, unsafe_allow_html=True)
-
 
 # Call it once after THEME setup:
 apply_dynamic_css(THEME_KEY)
