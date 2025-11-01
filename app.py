@@ -44,29 +44,17 @@ st.set_page_config(
     layout="wide",
 )
 
-# -------------------- THEME DETECTION + TOGGLE --------------------
-def _detect_system_theme() -> str:
-    """Detect system theme using darkdetect (if available)."""
-    try:
-        import darkdetect
-        mode = darkdetect.theme()
-        if mode:
-            return mode.lower()
-    except Exception:
-        pass
-    fallback = st.get_option("theme.base")
-    return (fallback or "light").lower()
-
-# Initialize forced theme from system
+# -------------------- THEME INITIALIZATION --------------------
+# Always start in LIGHT mode by default
 if "forced_theme" not in st.session_state:
-    st.session_state["forced_theme"] = _detect_system_theme()
+    st.session_state["forced_theme"] = "light"
 
 # Preserve original getter
 if "_orig_get_option" not in st.session_state:
     st.session_state["_orig_get_option"] = st.get_option
 
 def _get_option_patched(key: str):
-    """Force Streamlit to use user-selected theme, not system theme."""
+    """Force Streamlit to use the selected theme, defaulting to Light."""
     if key == "theme.base":
         return st.session_state.get("forced_theme", "light")
     return st.session_state["_orig_get_option"](key)
@@ -87,45 +75,79 @@ CARD_BG = "#171A21" if IS_DARK else "#FFFFFF"
 BORDER = "#2C3340" if IS_DARK else "#E7EAF0"
 SIDEBAR_BG = "#111418" if IS_DARK else "#F7F8FA"
 
+
 # -------------------- GLOBAL STYLES (dynamic with THEME_KEY) --------------------
 def apply_dynamic_css(theme_key: str):
     """Inject dynamic CSS that fully refreshes with theme toggle."""
+    IS_DARK = st.session_state.get("forced_theme", "light") == "dark"
+
+    BG = "#0F1116" if IS_DARK else "#FFFFFF"
+    FG = "#FFFFFF" if IS_DARK else "#000000"
+    CARD_BG = "#171A21" if IS_DARK else "#FFFFFF"
+    BORDER = "#2C3340" if IS_DARK else "#E7EAF0"
+    SIDEBAR_BG = "#111418" if IS_DARK else "#F7F8FA"
+    SIDEBAR_FG = "#FFFFFF" if IS_DARK else "#000000"
+    ACCENT_1 = "#64B5F6" if IS_DARK else "#1E88E5"
+    ACCENT_2 = "#9575CD" if IS_DARK else "#673AB7"
+    SUBTLE = "#2A2F3A" if IS_DARK else "#F2F4F7"
+    UPLOAD_BG = "#1C1F26" if IS_DARK else "#F9FAFB"  # Inner drag/drop zone
+
     st.markdown(f"""
     <style id="{theme_key}">
     html, body, .stApp {{
-      background-color: {BG} !important;
-      color: {FG} !important;
-      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    }}
-    h1, h2, h3, h4, h5, h6 {{ color: {FG} !important; }}
-    h1 {{
-      text-align:center; font-size:2.2rem; font-weight:800; margin-bottom:1.2rem;
-      background: linear-gradient(90deg, {ACCENT_1}, {ACCENT_2});
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+        background-color: {BG} !important;
+        color: {FG} !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }}
 
-    /* ================================
-       SIDEBAR
-    ================================== */
+    /* HEADERS & TEXT */
+    h1, h2, h3, h4, h5, h6, label, p, span, div, strong, b {{
+        color: {FG} !important;
+    }}
+    h1 {{
+        text-align:center;
+        font-size:2.2rem;
+        font-weight:800;
+        margin-bottom:1.2rem;
+        background: linear-gradient(90deg, {ACCENT_1}, {ACCENT_2});
+        -webkit-background-clip:text;
+        -webkit-text-fill-color:transparent;
+    }}
+
+    /* SIDEBAR */
     [data-testid="stSidebar"] {{
         background-color: {SIDEBAR_BG} !important;
-        color: {FG} !important;
-        border-right: 1px solid {BORDER};
+        color: {SIDEBAR_FG} !important;
+        border-right: 1px solid {BORDER} !important;
     }}
-    [data-testid="stSidebar"] * {{ color: {FG} !important; }}
-    [data-testid="stSidebar"] .stButton>button {{
-        background: linear-gradient(90deg, {ACCENT_1}, {ACCENT_2});
-        color: #fff !important;
-        border:none; border-radius:10px; font-weight:700;
+    [data-testid="stSidebar"] * {{
+        color: {SIDEBAR_FG} !important;
     }}
 
-    /* ================================
-       GLOBAL BUTTONS
-    ================================== */
+    /* Sidebar buttons */
+    [data-testid="stSidebar"] .stButton>button {{
+        background: linear-gradient(90deg, {ACCENT_1}, {ACCENT_2}) !important;
+        color: #FFFFFF !important;
+        font-weight: 800 !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 0.6rem 1rem !important;
+        text-align: center !important;
+        transition: all 0.25s ease-in-out;
+    }}
+    [data-testid="stSidebar"] .stButton>button * {{
+        color: #FFFFFF !important;
+    }}
+    [data-testid="stSidebar"] .stButton>button:hover {{
+        opacity: 0.9 !important;
+        transform: scale(1.03);
+    }}
+
+    /* MAIN BUTTONS */
     .stButton>button,
     .stDownloadButton>button {{
-        background: linear-gradient(90deg, {ACCENT_1}, {ACCENT_2});
-        color: #ffffff !important;
+        background: linear-gradient(90deg, {ACCENT_1}, {ACCENT_2}) !important;
+        color: #FFFFFF !important;
         border: none;
         border-radius: 10px;
         font-weight: 700;
@@ -138,80 +160,108 @@ def apply_dynamic_css(theme_key: str):
         transform: scale(1.02);
     }}
 
-    /* ================================
-       METRICS
-    ================================== */
-    [data-testid="stMetric"] {{
-        background: {CARD_BG} !important;
-        border: 1px solid {BORDER};
-        border-radius: 12px;
-        padding: 0.8rem;
-        text-align: center;
-    }}
-    [data-testid="stMetricLabel"], 
-    [data-testid="stMetricValue"] {{
+    /* INPUTS & TEXTBOXES */
+    input, select, textarea {{
         color: {FG} !important;
+        background-color: {CARD_BG} !important;
+        border: 1px solid {BORDER} !important;
     }}
-
-    /* ================================
-       INPUTS, SELECTS, DATE, FILE UPLOAD
-    ================================== */
+    .stTextInput input,
     .stSelectbox div[data-baseweb="select"] > div,
     .stMultiSelect div[data-baseweb="select"] > div,
-    .stTextInput input,
     .stDateInput input,
     .stNumberInput input,
-    .stFileUploader label div[data-testid="stFileUploaderDropzone"],
-    .stFileUploader div[data-testid="stFileUploaderDropzone"] *,
     .stTextArea textarea {{
         color: {FG} !important;
         background-color: {CARD_BG} !important;
         border: 1px solid {BORDER} !important;
     }}
 
-    /* Dropdown menu items */
-    .stSelectbox [data-baseweb="popover"] *,
-    .stMultiSelect [data-baseweb="popover"] * {{
-        color: {FG} !important;
-        background-color: {CARD_BG} !important;
-    }}
-
-    /* Upload text (filename + Browse files text) */
-    .stFileUploader div[role="button"],
-    .stFileUploader label,
-    .stFileUploader span {{
-        color: {FG} !important;
-    }}
-
-    /* Date inputs (numbers + placeholder) */
-    .stDateInput input {{
-        color: {FG} !important;
-        background-color: {CARD_BG} !important;
-    }}
-
-    /* Text inputs (e.g. Search description) */
-    input[type="text"], select {{
-        color: {FG} !important;
-        background-color: {CARD_BG} !important;
+    /* FILE UPLOADER (outer container) */
+    [data-testid="stFileUploader"] {{
+        background-color: {SUBTLE} !important;
+        border-radius: 10px !important;
         border: 1px solid {BORDER} !important;
+        padding: 1rem !important;
+    }}
+    [data-testid="stFileUploader"] * {{
+        color: {FG} !important;
     }}
 
-    /* ================================
-       PLOTLY CONTAINERS
-    ================================== */
+    /* FILE UPLOADER (inner drag/drop box) */
+    [data-testid="stFileUploaderDropzone"] {{
+        background-color: {UPLOAD_BG} !important;
+        color: {FG} !important;
+        border: 2px dashed {BORDER} !important;
+        border-radius: 12px !important;
+        transition: all 0.3s ease-in-out !important;
+        text-align: center !important;
+    }}
+    [data-testid="stFileUploaderDropzone"]:hover {{
+        border-color: {ACCENT_1} !important;
+        box-shadow: 0 0 10px {ACCENT_1}33 !important;
+    }}
+
+    /* "Drag and drop" text styling */
+    [data-testid="stFileUploaderDropzone"] div:nth-child(1) {{
+        font-weight: 600 !important;
+        font-size: 1.05rem !important;
+        color: {FG} !important;
+    }}
+
+    /* "Browse files" button inside uploader */
+    [data-testid="stFileUploaderDropzone"] button {{
+        background: linear-gradient(90deg, {ACCENT_1}, {ACCENT_2}) !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 0.4rem 1.2rem !important;
+        margin-top: 0.5rem !important;
+        transition: all 0.25s ease-in-out !important;
+    }}
+    [data-testid="stFileUploaderDropzone"] button:hover {{
+        opacity: 0.9 !important;
+        transform: scale(1.03);
+    }}
+
+    /* METRICS */
+    [data-testid="stMetric"] {{
+        background: {CARD_BG} !important;
+        border: 1px solid {BORDER};
+        border-radius: 12px;
+        padding: 0.8rem;
+        text-align: center;
+        color: {FG} !important;
+    }}
+    [data-testid="stMetricLabel"],
+    [data-testid="stMetricValue"],
+    [data-testid="stMetricDelta"] {{
+        color: {FG} !important;
+    }}
+
+    /* PLOTLY CONTAINERS */
     .plotly-chart, .stPlotlyChart, .plot-container {{
         background-color: {CARD_BG} !important;
         border: 1px solid {BORDER} !important;
         border-radius: 12px;
         padding: 0.6rem;
+        color: {FG} !important;
     }}
 
-    /* Smooth color transition */
+    /* DATAFRAMES */
+    .dataframe tbody tr, .dataframe thead th {{
+        color: {FG} !important;
+        background-color: {CARD_BG} !important;
+    }}
+
+    /* Smooth color transitions */
     * {{
         transition: background-color 0.3s ease, color 0.3s ease;
     }}
     </style>
     """, unsafe_allow_html=True)
+
 
 # Call it once after THEME setup:
 apply_dynamic_css(THEME_KEY)
@@ -224,8 +274,6 @@ toggle_label = "☀️ Switch to Light Mode" if IS_DARK else "🌙 Switch to Dar
 if st.sidebar.button(toggle_label, use_container_width=True):
     st.session_state["forced_theme"] = "light" if IS_DARK else "dark"
     st.rerun()
-
-st.sidebar.caption(f"System detected **{THEME.capitalize()}**. You can toggle anytime.")
 
 # Savings target + alerts
 st.sidebar.header("🎯 Goals & Alerts")
